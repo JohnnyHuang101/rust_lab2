@@ -1,7 +1,6 @@
 use std::sync::atomic::AtomicBool;
 
 pub type Line = (usize, String, String);
-pub type Play = Vec<Line>;
 
 //command-line arity & positions
 pub const ARGS_MIN: usize = 2;

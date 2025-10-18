@@ -16,23 +16,23 @@ const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
 const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
 const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
 
-pub fn add_script_line(play_vec: &mut Play, unparsed_line: &String, part_name: &String){
-    if unparsed_line.len() > 0 {
-        if let Some((first_token, remain_token)) = unparsed_line.split_once(char::is_whitespace) {
-            let line_extract = remain_token.trim(); //this will return &str, so we need to_string when pushing to Play
+// pub fn add_script_line(play_vec: &mut Play, unparsed_line: &String, part_name: &String){
+//     if unparsed_line.len() > 0 {
+//         if let Some((first_token, remain_token)) = unparsed_line.split_once(char::is_whitespace) {
+//             let line_extract = remain_token.trim(); //this will return &str, so we need to_string when pushing to Play
             
-            //using if let for error handling. Base case is if parse returns anything other than Ok
-            if let Ok(line_num) = first_token.parse::<usize>() {
-               play_vec.push((line_num, part_name.to_string(), line_extract.to_string()));
-            } else {
-                 if WHINGE.load(Ordering::SeqCst){
-                    eprintln!("Error: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
-                }
+//             //using if let for error handling. Base case is if parse returns anything other than Ok
+//             if let Ok(line_num) = first_token.parse::<usize>() {
+//                play_vec.push((line_num, part_name.to_string(), line_extract.to_string()));
+//             } else {
+//                  if WHINGE.load(Ordering::SeqCst){
+//                     eprintln!("Error: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
+//                 }
 
-            }
-        }
-    }
-}
+//             }
+//         }
+//     }
+// }
 
 
 pub fn grab_trimmed_file_lines(file_name: &String, file_line_vec: &mut Vec<String>) -> Result<(), u8>{
@@ -74,25 +74,25 @@ pub fn grab_trimmed_file_lines(file_name: &String, file_line_vec: &mut Vec<Strin
     }
 }
 
-pub fn process_config(play_vec: &mut Play, play_cfg: &PlayConfig) -> Result<(), u8> {
-    //note: iter yeilds immutable refs in rusts
-    for a_cfg in play_cfg.iter() {
-        //example from Expressions slide: match t {(x, y) => do_func(x,y);}
-        match a_cfg {(part_name, speak_file) => {
-            let mut cur_file_line_vec: Vec::<String> = Vec::new();
-            if let Err(e_code) = grab_trimmed_file_lines(&speak_file, &mut cur_file_line_vec) {
-                println!("Error: process_config unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
-                return Err(GENERATION_FAILURE);
-            } 
+// pub fn process_config(play_vec: &mut Play, play_cfg: &PlayConfig) -> Result<(), u8> {
+//     //note: iter yeilds immutable refs in rusts
+//     for a_cfg in play_cfg.iter() {
+//         //example from Expressions slide: match t {(x, y) => do_func(x,y);}
+//         match a_cfg {(part_name, speak_file) => {
+//             let mut cur_file_line_vec: Vec::<String> = Vec::new();
+//             if let Err(e_code) = grab_trimmed_file_lines(&speak_file, &mut cur_file_line_vec) {
+//                 println!("Error: process_config unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
+//                 return Err(GENERATION_FAILURE);
+//             } 
 
-            for a_line in cur_file_line_vec.iter() {
-                add_script_line(play_vec, a_line, part_name)
-            }
+//             for a_line in cur_file_line_vec.iter() {
+//                 add_script_line(play_vec, a_line, part_name)
+//             }
 
-        }}
-    }
-    Ok (())
-}
+//         }}
+//     }
+//     Ok (())
+// }
 
 pub fn add_config(cfg_line: &String, play_cfg: &mut PlayConfig){
     //split_whitespace gives an iterable, and collect turns that into a collection
