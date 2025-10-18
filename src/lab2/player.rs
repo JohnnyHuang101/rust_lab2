@@ -1,6 +1,6 @@
 use std::sync::atomic::Ordering;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
-use super::script_gen::grab_trimmed_file_lines;
+use super::script_gen::grab_trimmed_file_lines; //needed to impoirt this
 pub type PlayLines = Vec<(usize, String)>;
 
 pub struct Player{
@@ -54,6 +54,38 @@ impl Player{
 
         Ok (())
     }
+
+    pub fn speak(&mut self, most_recent_speaker: &mut String){
+        if self.cur_entry_idx < self.char_lines.len(){
+            //check if passed in name same as struct char name
+            if *most_recent_speaker != self.char_name {
+                *most_recent_speaker = self.char_name.to_string();
+                println!();
+                println!("Speaker: {}", most_recent_speaker);
+            }
+            
+            //'either case should print out text and inc index'
+            println!("{:?}", self.char_lines[self.cur_entry_idx]);
+            self.cur_entry_idx += 1;
+
+
+        } 
+        //simply return if lines >= lines. So if the lines are already past the players lines, we do nothing
+    }  
+
+    //dd an associated public next_line method to the implementation block for the Player struct, 
+    // which takes an immutable reference to itself and returns an Option<usize>.
+    //  The method should check whether the Player struct's index is less than the number of elements in its PlayLines container: 
+    // if it is, the method should return Some() with the line number at the current index; if it is not, 
+    // the method should return None.
+
+    pub fn next_line(&self) -> Option<usize> {
+        if self.cur_entry_idx < self.char_lines.len(){
+            return Some(self.char_lines[self.cur_entry_idx].0)
+        }else{
+            return None
+        }
+    } 
 
 
 }
