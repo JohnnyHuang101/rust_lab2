@@ -7,7 +7,7 @@ use super::declarations::{WHINGE,Play,GENERATION_FAILURE};
 
 
 
-pub type PlayConfig = Vec<(String, String)>;
+// pub type PlayConfig = Vec<(String, String)>;
 
 const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
 const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
