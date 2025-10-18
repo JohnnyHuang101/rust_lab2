@@ -1,0 +1,4 @@
+6                 yoooooooooooo                 
+7: this line should not appear because we have a colon next to the number
+this line should not appear because we don't have a associated line number
+7                         great work everyone!
