@@ -115,6 +115,7 @@ impl Play{
 
     pub fn recite(&mut self) -> Result<(), u8> {
         let mut most_recent_speaker = String::new();
+        let mut prev_line_num = 0; //keep track of duplicated lines
         //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let mut linenum_and_speaker_vec: Vec<(usize, usize)> = Vec::new();
 
@@ -129,6 +130,11 @@ impl Play{
         //sort by line_num
         linenum_and_speaker_vec.sort_by_key(|a_tuple| a_tuple.0);
         println!("{:?}", linenum_and_speaker_vec);
+        if WHINGE.load(Ordering::SeqCst) {
+            if linenum_and_speaker_vec[0].0 != 1{
+                eprintln!("WHINGE Warning: line number should start at 0!");
+            }
+        }
         //loop through vector to get player idx and call speak
         for (line_num_speak, player_idx) in linenum_and_speaker_vec.iter(){ //line_num_speak are the line numbers a character is suppoed to speak according to our sorting. Use this with next_line to prevent character from speaking all their lines.
             while let Some(line_num) = self.chars_in_play[*player_idx].next_line(){  //.iter.enumerate gives reference
