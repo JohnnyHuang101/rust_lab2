@@ -7,3 +7,6 @@
 
 #Return Wrapper:
 * i implemented the wrapper by using a struct and defining 2 functions called report and new. Report has to be implemented for a termination trait because it is in charge of ending ht eprogram and new i had to add because i need it to construct new returnwrappers. at first id dint have it and it gave me lots of compilation errors os io had to add it.
+
+
+# Scene Fragments
