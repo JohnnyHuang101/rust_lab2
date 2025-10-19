@@ -120,7 +120,7 @@ impl Play{
 
     pub fn recite(&mut self) -> Result<(), u8> {
         let mut most_recent_speaker = String::new();
-        let mut prev_line_num = 0; //keep track of duplicated lines
+        // let mut prev_line_num = 0; //keep track of duplicated lines
         //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let mut linenum_and_speaker_vec: Vec<(usize, usize)> = Vec::new();
 

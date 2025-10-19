@@ -6,7 +6,7 @@ pub type Line = (usize, String, String);
 pub const ARGS_MIN: usize = 2;
 pub const ARGS_MAX: usize = 3;
 pub const ARG_PROGRAM_IDX: usize = 0;
-pub const ARG_CONFIG_IDX: usize = 1;
+pub const ARG_SCRIPT_IDX: usize = 1;
 pub const ARG_WHINGE_IDX: usize = 2;
 
 //exit codes
