@@ -44,7 +44,7 @@ impl Player{
 
         let mut cur_file_line_vec: Vec::<String> = Vec::new();
         if let Err(e_code) = grab_trimmed_file_lines(&part_name, &mut cur_file_line_vec) {
-            println!("Error: process_config unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
+            println!("Error: process_script unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
             return Err(GENERATION_FAILURE);
         } 
 
