@@ -4,6 +4,7 @@ use super::declarations::{WHINGE,GENERATION_FAILURE};
 use super::script_gen::grab_trimmed_file_lines; //needed to impoirt this
 pub type PlayLines = Vec<(usize, String)>;
 
+#[derive(Debug)]
 pub struct Player{
     pub char_name: String,
     pub char_lines: PlayLines,
@@ -65,7 +66,7 @@ impl Player{
             }
             
             //'either case should print out text and inc index'
-            println!("{:?}", self.char_lines[self.cur_entry_idx]);
+            println!("{:?}", self.char_lines[self.cur_entry_idx].1);
             self.cur_entry_idx += 1
 
 

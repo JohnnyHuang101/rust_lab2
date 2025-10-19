@@ -12,15 +12,15 @@ pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a ch
 pub type PlayConfig = Vec<(String, String)>;
 
 pub struct SceneFragment{
-    scene_title: String,
-    chars_in_play: Vec<Player>,
+    pub scene_title: String,
+    pub chars_in_play: Vec<Player>,
 }
 
 impl SceneFragment{
 
-    pub fn new(fragment: &String) -> Self {
+    pub fn new(fragment_title: &String) -> Self {
          Self {
-            scene_title: fragment.to_string(),
+            scene_title: fragment_title.to_string(),
             chars_in_play: Vec::new(),
          }
     }
@@ -70,7 +70,7 @@ impl SceneFragment{
         }
 
     }
-
+    
     pub fn read_config(&mut self, cfg_fname: &String, play_cfg: &mut PlayConfig) -> Result<(), u8> {
         //play_title param is now a struct attribute self.scene_title
 
@@ -78,14 +78,14 @@ impl SceneFragment{
 
         match grab_trimmed_file_lines(&cfg_fname, &mut cfg_lines) {
             Ok(_) => { //don't really need to read the ok code so use _
-                if cfg_lines.len() < 2 {
-                    println!("Error: less than 2 lines from config were read, exiting read_config with error code {}", GENERATION_FAILURE);
+                
+                // A config file can have 1 line, so we just check if it's empty
+                if cfg_lines.is_empty() { 
+                    println!("Error: no lines from config file '{}' were read, exiting read_config with error code {}", cfg_fname, GENERATION_FAILURE);
                     return Err(GENERATION_FAILURE);
                 }
-                
-                self.scene_title = cfg_lines[TITLE_IDX].to_string();
-                // can skip the 1st elem of cfg_lines as it contains the title, using PART_FILE_IDX for this
-                for a_cfg_line in cfg_lines.iter().skip(PART_FILE_IDX) {
+            
+                for a_cfg_line in cfg_lines.iter() {
                     //iter should already make a_cfg_line of &String type
                     self.add_config(a_cfg_line, play_cfg)
                 }
@@ -99,6 +99,7 @@ impl SceneFragment{
 
         Ok(())
     }
+
 
 
     pub fn prepare(&mut self, cfg_fname: &String) -> Result<(), u8> {
@@ -140,7 +141,7 @@ impl SceneFragment{
 
         //sort by line_num
         linenum_and_speaker_vec.sort_by_key(|a_tuple| a_tuple.0);
-        println!("{:?}", linenum_and_speaker_vec);
+        // println!("{:?}", linenum_and_speaker_vec);
         //Whinge if the first line doesn't start at 0
         if WHINGE.load(Ordering::SeqCst) {
             if linenum_and_speaker_vec[0].0 != 0{
@@ -163,40 +164,43 @@ impl SceneFragment{
     }
 
     pub fn enter(&self, prev: &SceneFragment) {
-
+        // println!("In enter");
         if self.scene_title.split_whitespace().next().is_some() {
-            println!("{}", self.scene_title);
+            println!("{:?}", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            if !prev.chars_in_play.contains(plyr) {
-                println!("[Enter {}]", plyr);
+            if !prev.chars_in_play.iter().any(|prev_plyr| prev_plyr.char_name == plyr.char_name) {
+                println!("[Enter {:?}]", plyr.char_name);
             }
         }
     }
 
     pub fn enter_all(&self) {
 
+        // println!("In enter all");
         if self.scene_title.split_whitespace().next().is_some() {
-            println!("{}", self.scene_title);
+            println!("{:?}!", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            println!("[Enter {}]", plyr);
+            println!("[Enter {:?}]", plyr.char_name);
         }
     }
 
     pub fn exit(&self, other: &SceneFragment) {
+        // println!("In exit");
         for plyr in self.chars_in_play.iter().rev() {
-            if !other.chars_in_play.contains(plyr) {
-                println!("[Exit {}]", plyr);
+            if !other.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
+                println!("[Exit {:?}]", plyr.char_name);
             }
         }
     }
 
     pub fn exit_all(&self) {
+        // println!("In exit all");
         for plyr in self.chars_in_play.iter().rev() {
-            println!("[Exit {}]", plyr);
+            println!("[Exit {:?}]", plyr.char_name);
         }
     }
 }
