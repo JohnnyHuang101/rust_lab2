@@ -12,6 +12,7 @@ use lab2::declarations::{
 };
 // use lab2::script_gen::script_gen;
 use lab2::play::Play;
+use lab2::return_wrapper::ReturnWrapper;
 
 fn usage(program_name: &str) -> String {
     format!(" wrong command line arguments. Correct usage: {program_name} <config-file> [whinge]\n")
@@ -59,12 +60,12 @@ fn parse_args(config: &mut String) -> Result<(), u8> {
 // }
 
 
-fn main() -> Result<(), u8> {
+fn main() -> ReturnWrapper {
     let mut config_fname = String::new();
 
     if let Err(e_code) = parse_args(&mut config_fname){
         println!("Error in main when calling parse_args with error code {}", e_code);
-        return Err(EXIT_BAD_CMDLINE)
+        return ReturnWrapper::new(EXIT_BAD_CMDLINE)
     }
 
     let mut play_title = String::new();
@@ -73,7 +74,7 @@ fn main() -> Result<(), u8> {
     if let Err(e_code) = play_content.prepare(&config_fname){
 
         eprintln!("Error: in main, {}", e_code);
-        return Err(GENERATION_FAILURE);
+        return ReturnWrapper::new(GENERATION_FAILURE)
 
     }else{
         play_content.recite();
@@ -91,7 +92,7 @@ fn main() -> Result<(), u8> {
     //     return Err(GENERATION_FAILURE);
     // }
 
-    Ok(())
+    return ReturnWrapper::new(0)
 }
 
 
