@@ -3,18 +3,18 @@ use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
 use std::sync::atomic::Ordering;
-use super::declarations::{WHINGE,Play,GENERATION_FAILURE};
+use super::declarations::{WHINGE,GENERATION_FAILURE};
 
 
 
 // pub type PlayConfig = Vec<(String, String)>;
 
-const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
-const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
+pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
+pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
 
-const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
-const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
-const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
+pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
+pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
+pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
 
 // pub fn add_script_line(play_vec: &mut Play, unparsed_line: &String, part_name: &String){
 //     if unparsed_line.len() > 0 {
@@ -68,7 +68,7 @@ pub fn grab_trimmed_file_lines(file_name: &String, file_line_vec: &mut Vec<Strin
 
         }
         Err(e_code) => {
-            println!("Error: in grab_trimmed_file_lines, failed to open file with error code: {}", e_code);
+            println!("Error: in grab_trimmed_file_lines, failed to open file with error code: {} and file name: {}", e_code, file_name);
             return Err(GENERATION_FAILURE);
         }
     }
@@ -94,67 +94,67 @@ pub fn grab_trimmed_file_lines(file_name: &String, file_line_vec: &mut Vec<Strin
 //     Ok (())
 // }
 
-pub fn add_config(cfg_line: &String, play_cfg: &mut PlayConfig){
-    //split_whitespace gives an iterable, and collect turns that into a collection
-    //since using &str, need to do .to_string when inserting into play_cfg because it is of type <String, String>
-    let cfg_items: Vec<&str> = cfg_line.split_whitespace().collect(); 
+// pub fn add_config(cfg_line: &String, play_cfg: &mut PlayConfig){
+//     //split_whitespace gives an iterable, and collect turns that into a collection
+//     //since using &str, need to do .to_string when inserting into play_cfg because it is of type <String, String>
+//     let cfg_items: Vec<&str> = cfg_line.split_whitespace().collect(); 
     
 
-    if cfg_items.len() > EXPECTED_TOKENS {
-        if WHINGE.load(Ordering::SeqCst) {
-            eprintln!("Error: expecting config line to have 2 items but got more than 2 items, pushing first 2 elements");
-        }
-        play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
-    } else if cfg_items.len() < EXPECTED_TOKENS {
-        if WHINGE.load(Ordering::SeqCst) {
-            eprintln!("Error: expecting config line to have 2 items but got less than 2 items. Not pushing anything");
-        }
-    } else {
-        play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
-    }
+//     if cfg_items.len() > EXPECTED_TOKENS {
+//         if WHINGE.load(Ordering::SeqCst) {
+//             eprintln!("Error: expecting config line to have 2 items but got more than 2 items, pushing first 2 elements");
+//         }
+//         play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
+//     } else if cfg_items.len() < EXPECTED_TOKENS {
+//         if WHINGE.load(Ordering::SeqCst) {
+//             eprintln!("Error: expecting config line to have 2 items but got less than 2 items. Not pushing anything");
+//         }
+//     } else {
+//         play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
+//     }
 
-}
+// }
 
-pub fn read_config(cfg_fname: &String, play_title: &mut String, play_cfg: &mut PlayConfig) -> Result<(), u8> {
-    let mut cfg_lines: Vec<String> = Vec::new();
+// pub fn read_config(cfg_fname: &String, play_title: &mut String, play_cfg: &mut PlayConfig) -> Result<(), u8> {
+//     let mut cfg_lines: Vec<String> = Vec::new();
 
-    match grab_trimmed_file_lines(&cfg_fname, &mut cfg_lines) {
-        Ok(_) => { //don't really need to read the ok code so use _
-            if cfg_lines.len() < 2 {
-                println!("Error: less than 2 lines from config were read, exiting read_config with error code {}", GENERATION_FAILURE);
-                return Err(GENERATION_FAILURE);
-            }
+//     match grab_trimmed_file_lines(&cfg_fname, &mut cfg_lines) {
+//         Ok(_) => { //don't really need to read the ok code so use _
+//             if cfg_lines.len() < 2 {
+//                 println!("Error: less than 2 lines from config were read, exiting read_config with error code {}", GENERATION_FAILURE);
+//                 return Err(GENERATION_FAILURE);
+//             }
             
-            *play_title = cfg_lines[TITLE_IDX].to_string();
-            // can skip the 1st elem of cfg_lines as it contains the title, using PART_FILE_IDX for this
-            for a_cfg_line in cfg_lines.iter().skip(PART_FILE_IDX) {
-                //iter should already make a_cfg_line of &String type
-                add_config(a_cfg_line, play_cfg)
-            }
-        },
-        Err(e_code) => {
-            println!("Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
-            return Err(GENERATION_FAILURE);
-        }
+//             *play_title = cfg_lines[TITLE_IDX].to_string();
+//             // can skip the 1st elem of cfg_lines as it contains the title, using PART_FILE_IDX for this
+//             for a_cfg_line in cfg_lines.iter().skip(PART_FILE_IDX) {
+//                 //iter should already make a_cfg_line of &String type
+//                 add_config(a_cfg_line, play_cfg)
+//             }
+//         },
+//         Err(e_code) => {
+//             println!("Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
+//             return Err(GENERATION_FAILURE);
+//         }
 
-    }
+//     }
 
-    Ok(())
-}
+//     Ok(())
+// }
 
 
-pub fn script_gen(cfg_fname: &String, play_title: &mut String, play_vec: &mut Play) -> Result<(), u8> {
-    let mut playcfg_var = PlayConfig::new();
-    if let Err(e_code) = read_config(cfg_fname, play_title, &mut playcfg_var) {
-        println!("Error: in script_gen, read_config call failed with error code {}", e_code);
-        return Err(GENERATION_FAILURE);
-    }
+// pub fn script_gen(cfg_fname: &String, play_title: &mut String, play_vec: &mut Play) -> Result<(), u8> {
+//     let mut playcfg_var = PlayConfig::new();
+//     if let Err(e_code) = read_config(cfg_fname, play_title, &mut playcfg_var) {
+//         println!("Error: in script_gen, read_config call failed with error code {}", e_code);
+//         return Err(GENERATION_FAILURE);
+//     }
 
-    if let Err(e_code) = process_config(play_vec, &playcfg_var) {
-        println!("Error: in script_gen, process_config call failed with error code {}", e_code);
-        return Err(GENERATION_FAILURE);
-    }
+//     if let Err(e_code) = process_config(play_vec, &playcfg_var) {
+//         println!("Error: in script_gen, process_config call failed with error code {}", e_code);
+//         return Err(GENERATION_FAILURE);
+//     }
 
-    Ok(())
-}
+//     Ok(())
+// }
 

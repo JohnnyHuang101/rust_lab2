@@ -1,5 +1,0 @@
-The hamlet play but characters aside from king and queen have empty part files
-Guildenstern ./data/Guildenstern_empty.txt
-King ./data/King.txt
-Queen ./data/Queen.txt
-Rosencrantz ./data/Rosencrantz_empty.txt

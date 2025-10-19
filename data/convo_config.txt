@@ -1,4 +1,0 @@
-conversation about class
-Abro ./data/abro.txt extra1 extra2 extra3
-Hbro ./data/hbro.txt
-Jbro ./data/jbro.txt
