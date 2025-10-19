@@ -1,8 +1,13 @@
 use super::player::Player;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
-use super::script_gen::{EXPECTED_TOKENS,CHAR_NAME_POS,FILE_NAME_TOKEN_POS, 
-    TITLE_IDX, PART_FILE_IDX, grab_trimmed_file_lines};
+use super::script_gen::grab_trimmed_file_lines;
+
+pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
+pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
+pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
+pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
+pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
 
 pub type PlayConfig = Vec<(String, String)>;
 
@@ -130,8 +135,9 @@ impl Play{
         //sort by line_num
         linenum_and_speaker_vec.sort_by_key(|a_tuple| a_tuple.0);
         println!("{:?}", linenum_and_speaker_vec);
+        //Whinge if the first line doesn't start at 0
         if WHINGE.load(Ordering::SeqCst) {
-            if linenum_and_speaker_vec[0].0 != 1{
+            if linenum_and_speaker_vec[0].0 != 0{
                 eprintln!("WHINGE Warning: line number should start at 0!");
             }
         }

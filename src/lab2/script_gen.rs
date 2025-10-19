@@ -2,19 +2,19 @@
 use std::fs::File;
 use std::io::BufReader;
 use std::io::BufRead;
-use std::sync::atomic::Ordering;
-use super::declarations::{WHINGE,GENERATION_FAILURE};
+// use std::sync::atomic::Ordering;
+use super::declarations::GENERATION_FAILURE;
 
 
 
 // pub type PlayConfig = Vec<(String, String)>;
 
-pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
-pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
+// pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
+// pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
 
-pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
-pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
-pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
+// pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
+// pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
+// pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
 
 // pub fn add_script_line(play_vec: &mut Play, unparsed_line: &String, part_name: &String){
 //     if unparsed_line.len() > 0 {
