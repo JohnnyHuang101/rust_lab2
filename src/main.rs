@@ -68,7 +68,7 @@ fn main() -> ReturnWrapper {
         return ReturnWrapper::new(EXIT_BAD_CMDLINE)
     }
 
-    let mut play_title = String::new();
+    // let mut play_title = String::new();
     let mut play_content = Play::new();
 
     if let Err(e_code) = play_content.prepare(&script_fname){
@@ -77,7 +77,7 @@ fn main() -> ReturnWrapper {
         return ReturnWrapper::new(GENERATION_FAILURE)
 
     }else{
-        play_content.recite();
+        let _ = play_content.recite();
     }
 
     // if let Err(e_code) = script_gen(&script_fname, &mut play_title, &mut play_content) {
