@@ -1,4 +1,5 @@
-use std::sync::atomic::Ordering;
+use std::sync::atomic;
+use std::cmp::Ordering;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use super::script_gen::grab_trimmed_file_lines; //needed to impoirt this
 pub type PlayLines = Vec<(usize, String)>;
@@ -29,7 +30,7 @@ impl Player{
                 if let Ok(line_num) = first_token.parse::<usize>() {
                 self.char_lines.push((line_num, line_extract.to_string()));
                 } else {
-                    if WHINGE.load(Ordering::SeqCst){
+                    if WHINGE.load(atomic::Ordering::SeqCst){
                         eprintln!("Error: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
                     }
 
@@ -65,7 +66,7 @@ impl Player{
             
             //'either case should print out text and inc index'
             println!("{:?}", self.char_lines[self.cur_entry_idx]);
-            self.cur_entry_idx += 1;
+            self.cur_entry_idx += 1
 
 
         } 
@@ -86,4 +87,67 @@ impl Player{
         }
     } 
 
+}
+
+//partial eq fn sig: https://doc.rust-lang.org/std/cmp/trait.PartialEq.html
+impl PartialEq for Player{
+    fn eq(&self, other: &Self) -> bool{
+        if self.char_lines.len() == 0 && other.char_lines.len() == 0{
+            return true
+        }else if self.char_lines.len() != 0 && other.char_lines.len() != 0{
+            return self.char_lines[0].0 == other.char_lines[0].0
+        }
+        
+        return false
+    }
+}
+
+
+
+//how to implement Eq: https://doc.rust-lang.org/std/cmp/trait.Eq.html
+impl Eq for Player{}
+
+
+//A player is strictly less than another player (and the other player is thus strictly greater) 
+// if (1) they have no lines to speak and the other player does, or (2) both have lines to speak and they 
+// have a lower first line number than the other player.
+
+//PartialOrd fn sig: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
+impl PartialOrd for Player{
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering>{
+        if self.char_lines.len() == 0 && other.char_lines.len() != 0 {
+            return Some(Ordering::Less)
+        }
+        if self.char_lines.len() != 0 && other.char_lines.len() == 0 {
+            return Some(Ordering::Greater)
+        }
+        //first line number comparison
+        if self.char_lines[0].0 < other.char_lines[0].0{
+            return Some(Ordering::Less)
+        }
+        if self.char_lines[0].0 > other.char_lines[0].0{
+            return Some(Ordering::Greater)
+        }
+        return Some(Ordering::Equal)
+
+    }
+}
+
+impl Ord for Player{
+    fn cmp(&self, other: &Self) -> Ordering {
+        if self.char_lines.len() == 0 && other.char_lines.len() != 0 {
+            return Ordering::Less
+        }
+        if self.char_lines.len() != 0 && other.char_lines.len() == 0 {
+            return Ordering::Greater
+        }
+        //first line number comparison
+        if self.char_lines[0].0 < other.char_lines[0].0{
+            return Ordering::Less
+        }
+        if self.char_lines[0].0 > other.char_lines[0].0{
+            return Ordering::Greater
+        }
+        return Ordering::Equal
+    }
 }
