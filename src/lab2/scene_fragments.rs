@@ -122,12 +122,7 @@ impl SceneFragment{
 
     pub fn recite(&mut self) -> Result<(), u8> {
 
-        // if self.scene_title.split_whitespace().next().is_some() {
-        //     println!("{}", self.scene_title);
-        // }
-
         let mut most_recent_speaker = String::new();
-        // let mut prev_line_num = 0; //keep track of duplicated lines
         //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let mut linenum_and_speaker_vec: Vec<(usize, usize)> = Vec::new();
 
@@ -141,7 +136,7 @@ impl SceneFragment{
 
         //sort by line_num
         linenum_and_speaker_vec.sort_by_key(|a_tuple| a_tuple.0);
-        // println!("{:?}", linenum_and_speaker_vec);
+
         //Whinge if the first line doesn't start at 0
         if WHINGE.load(Ordering::SeqCst) {
             if linenum_and_speaker_vec[0].0 != 0{
@@ -163,44 +158,41 @@ impl SceneFragment{
 
     }
 
-    pub fn enter(&self, prev: &SceneFragment) {
-        // println!("In enter");
+    pub fn enter(&self, prev_fragment: &SceneFragment) {
         if self.scene_title.split_whitespace().next().is_some() {
             println!("{:?}", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            if !prev.chars_in_play.iter().any(|prev_plyr| prev_plyr.char_name == plyr.char_name) {
-                println!("[Enter {:?}]", plyr.char_name);
+            //to check if prev player is already in the current list of players by their character name. If not, print the [Enter name] statement
+            //followed this example using 'any' to check if elements in vec matches a condition: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.any
+            if !prev_fragment.chars_in_play.iter().any(|prev_plyr| prev_plyr.char_name == plyr.char_name) {
+                println!("[Enter {:?}.]", plyr.char_name);
             }
         }
     }
 
     pub fn enter_all(&self) {
-
-        // println!("In enter all");
         if self.scene_title.split_whitespace().next().is_some() {
             println!("{:?}!", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            println!("[Enter {:?}]", plyr.char_name);
+            println!("[Enter {:?}.]", plyr.char_name);
         }
     }
 
-    pub fn exit(&self, other: &SceneFragment) {
-        // println!("In exit");
-        for plyr in self.chars_in_play.iter().rev() {
-            if !other.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
-                println!("[Exit {:?}]", plyr.char_name);
+    pub fn exit(&self, next_fragment: &SceneFragment) {
+        for plyr in self.chars_in_play.iter().rev() { //using rev to reverse iterator so we print exit names in reverse order
+            if !next_fragment.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
+                println!("[Exit {:?}.]", plyr.char_name);
             }
         }
     }
 
     pub fn exit_all(&self) {
-        // println!("In exit all");
         for plyr in self.chars_in_play.iter().rev() {
-            println!("[Exit {:?}]", plyr.char_name);
+            println!("[Exit {:?}.]", plyr.char_name);
         }
     }
 }

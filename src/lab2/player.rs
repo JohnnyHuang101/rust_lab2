@@ -73,7 +73,7 @@ impl Player{
         } 
         //simply return if lines >= lines. So if the lines are already past the players lines, we do nothing
     }  
-
+    
     //dd an associated public next_line method to the implementation block for the Player struct, 
     // which takes an immutable reference to itself and returns an Option<usize>.
     //  The method should check whether the Player struct's index is less than the number of elements in its PlayLines container: 
@@ -134,6 +134,7 @@ impl PartialOrd for Player{
     }
 }
 
+//implementation for Ord trait should be same as Partial Ord but return without Some
 impl Ord for Player{
     fn cmp(&self, other: &Self) -> Ordering {
         if self.char_lines.len() == 0 && other.char_lines.len() != 0 {

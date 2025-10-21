@@ -77,17 +77,17 @@ impl Play{
         let cfg_items: Vec<&str> = cfg_line.split_whitespace().collect(); 
 
         if cfg_items.is_empty() {
-            return; // ignore blank lines
+            return;
         }
 
         if cfg_items[0] == "[scene]" {
             if cfg_items.len() == 1 {
-                //scene] alone, skip line
+                //[scene] alone, skip line and whinge
                 if WHINGE.load(Ordering::SeqCst) {
-                    eprintln!("Error: [scene] directive missing title");
+                    eprintln!("Whinge Warning: [scene] directive missing title");
                 }
             } else {
-                //with tiele ok
+                //contains other tokens with [scene], concat from 1st element and up
                 let scene_title = cfg_items[1..].join(" ");
                 play_cfg.push((true, scene_title));
             }
@@ -97,7 +97,7 @@ impl Play{
             play_cfg.push((false, cfg_items[0].to_string()));
             
             if cfg_items.len() > 1 && WHINGE.load(Ordering::SeqCst) {
-                eprintln!("Warning: additional tokens after config file name '{}'", cfg_items[0]);
+                eprintln!("Whinge Warning: there are additional tokens after config file name '{}'", cfg_items[0]);
             }
         }
     }
@@ -153,42 +153,73 @@ impl Play{
 
     pub fn recite(&mut self) -> Result<(), u8> {
 
-         // let mut prev_line_num = 0; //keep track of duplicated lines
-        //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let num_fragments = self.fragments.len();
+
+        //return early if fragments is empty
         if num_fragments == 0 {
-            return Ok(()); // Nothing to recite
+            return Ok(());
         }
+        
+        for cur_fragment_idx in 0..num_fragments{
 
-        for idx in 0..num_fragments {
-            
-            //handle enter logic
-            if idx == 0 {
-                self.fragments[idx].enter_all();
-            } else {
-                //not first, pass reference to previous
-                let (prev_slice, current_and_rest) = self.fragments.split_at_mut(idx);
-                let prev_fragment = &prev_slice[idx - 1];
-                let current_fragment = &mut current_and_rest[0];
-                current_fragment.enter(prev_fragment);
+            if cur_fragment_idx == 0{ //first fragment, call enter all
+                self.fragments[cur_fragment_idx].enter_all();
+            }else{ //save to do -1 to get prev index
+                let prev_fragment_idx = cur_fragment_idx - 1;
+                let ref_prev_fragment :&SceneFragment = &self.fragments[prev_fragment_idx]; //get reference to previous fragment
+                self.fragments[cur_fragment_idx].enter(ref_prev_fragment); //do the enter call
             }
-            //loop through vector to get player idx and call speak
-            let _ = self.fragments[idx].recite();
 
-            //Whinge if the first line doesn't start at 0
-            if idx == num_fragments - 1 {
-                
-                self.fragments[idx].exit_all();
-            } else {
-                // not the last, pass reference to next
-                let (current_slice, next_slice) = self.fragments.split_at_mut(idx + 1);
-                let current_fragment = &mut current_slice[idx];
-                let next_fragment = &next_slice[0];
-                current_fragment.exit(next_fragment);
-                
+            //do the actual recite call on the SceneFragment
+            if let Err(e_code) = self.fragments[cur_fragment_idx].recite(){
+                eprintln!("Error from recite in Play.rs: unsucessful fragment recite call with error code {}", e_code);
+                return Err(GENERATION_FAILURE);
             }
+
+            //block for exit name calls
+            if cur_fragment_idx == num_fragments-1 {
+                self.fragments[cur_fragment_idx].exit_all();
+            }else{
+                //safe to do +1 here to the fragment index
+                let next_fragment_idx = cur_fragment_idx + 1;
+                let ref_next_fragment :&SceneFragment = &self.fragments[next_fragment_idx];
+                self.fragments[cur_fragment_idx].exit(ref_next_fragment); 
+            }
+
         }
-
+        
         Ok(())
+
     }
+
 }
+// for idx in 0..num_fragments {
+            
+//             //handle enter logic
+//             if idx == 0 {
+//                 self.fragments[idx].enter_all();
+//             } else {
+//                 //not first, pass reference to previous
+//                 let (prev_slice, current_and_rest) = self.fragments.split_at_mut(idx);
+//                 let prev_fragment = &prev_slice[idx - 1];
+//                 let current_fragment = &mut current_and_rest[0];
+//                 current_fragment.enter(prev_fragment);
+//             }
+
+//             let _ = self.fragments[idx].recite();
+
+//             if idx == num_fragments - 1 {
+                
+//                 self.fragments[idx].exit_all();
+//             } else {
+//                 // not the last, pass reference to next
+//                 let (current_slice, next_slice) = self.fragments.split_at_mut(idx + 1);
+//                 let current_fragment = &mut current_slice[idx];
+//                 let next_fragment = &next_slice[0];
+//                 current_fragment.exit(next_fragment);
+                
+//             }
+//         }
+
+//         Ok(())
+//     }
