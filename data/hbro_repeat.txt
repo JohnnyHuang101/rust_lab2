@@ -1,0 +1,9 @@
+0 hello
+1 hello
+1 hello1
+1 hello2
+2 hello3
+ this line should not appear
+1 this line out of order
+nor should this line
+3 I am very sad and loser because I do not have a good job and I am stupid

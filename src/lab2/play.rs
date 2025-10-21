@@ -185,9 +185,7 @@ impl Play{
                 let ref_next_fragment :&SceneFragment = &self.fragments[next_fragment_idx];
                 self.fragments[cur_fragment_idx].exit(ref_next_fragment); 
             }
-
         }
-        
         Ok(())
 
     }

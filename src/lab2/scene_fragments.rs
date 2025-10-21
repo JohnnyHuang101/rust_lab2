@@ -2,6 +2,7 @@ use super::player::Player;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
 use super::script_gen::grab_trimmed_file_lines;
+use std::collections::HashSet; //need hashset for checking duplicate lines
 
 pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
 pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
@@ -119,29 +120,64 @@ impl SceneFragment{
         Ok(())
     }
 
+    //helper function for checking if line numbers in a Player struct in SceneFragment's vec of Players is duplicated. If so, return true else false
+    // fn check_dupe_lines(&self) -> bool {
+    //     let mut line_num_set :HashSet<usize> = HashSet::new();
+
+    //     for a_player in self.chars_in_play.iter(){
+    //         line_num_set.clear();
+    //         for a_line in a_player.char_lines.iter(){
+
+    //             let cur_line_num = a_line.0;
+    //             //hash set will return false if it didn't insert--meaning the line num already exist previously so there is a duplicate line
+    //             let set_insert_status = line_num_set.insert(cur_line_num);
+                
+    //             if !set_insert_status{
+    //                 return true;
+    //             }
+    //         }
+    //     }
+
+    //     return false;
+
+    // }
 
     pub fn recite(&mut self) -> Result<(), u8> {
 
         let mut most_recent_speaker = String::new();
         //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let mut linenum_and_speaker_vec: Vec<(usize, usize)> = Vec::new();
+        let mut linenum_set: HashSet<usize> = HashSet::new(); //use hashset to track dupe lines. If we insert dupe, it returns false so we use that to trigger whinge
 
         for (player_idx, a_player) in self.chars_in_play.iter().enumerate(){
             for (line_num, _)in a_player.char_lines.iter(){
                 
-                linenum_and_speaker_vec.push((*line_num, player_idx))
-
+                linenum_and_speaker_vec.push((*line_num, player_idx));
+                
+                //insert again into linenume_set to check for dupes
+                let linenum_insert_status = linenum_set.insert(*line_num);
+                if !linenum_insert_status{
+                    if WHINGE.load(Ordering::SeqCst) {
+                        eprintln!("WHINGE Warning: duplicate line detected for line number: {}", line_num);
+                    }
+                }
             }
         }
 
         //sort by line_num
         linenum_and_speaker_vec.sort_by_key(|a_tuple| a_tuple.0);
 
-        //Whinge if the first line doesn't start at 0
+        //Whinge if the first line doesn't start at 0 or there are duplicate lines
         if WHINGE.load(Ordering::SeqCst) {
             if linenum_and_speaker_vec[0].0 != 0{
                 eprintln!("WHINGE Warning: line number should start at 0!");
             }
+            
+            // //warning for dupe line, just need to run once per recite call
+            // if self.check_dupe_lines(){
+            //     eprintln!("WHINGE Warning: duplicate line detected!");
+
+            // }
         }
         //loop through vector to get player idx and call speak
         for (line_num_speak, player_idx) in linenum_and_speaker_vec.iter(){ //line_num_speak are the line numbers a character is suppoed to speak according to our sorting. Use this with next_line to prevent character from speaking all their lines.
@@ -154,6 +190,7 @@ impl SceneFragment{
                 }
             }
         }
+
         Ok(())
 
     }

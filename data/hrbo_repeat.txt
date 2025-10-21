@@ -1,8 +1,0 @@
-30 hello
-33 hello
-34 hello1
-34 hello2
-34 hello3
- this line should not appear
-31 this line out of order
-nor should this line
