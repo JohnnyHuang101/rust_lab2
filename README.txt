@@ -1,3 +1,67 @@
+# CSE 5402 Fall 2025 Lab 2
+
+## Teammates
+    * Aman Verma - aman.v@wustl.edu
+    * Johnny Huang - h.johnny@wustl.edu
+    * Hanson Li - hanson.l@wustl.edu
+
+## Structure
+``` 
+├── data
+│   ├── abro_repeat.txt
+│   ├── Guildenstern_hamlet_ii_2a.txt
+│   ├── hamlet_ii_1a_config.txt
+│   ├── hamlet_ii_1b_config.txt
+│   ├── hamlet_ii_2a_config.txt
+│   ├── hbro_repeat.txt
+│   ├── jbro_repeat.txt
+│   ├── King_hamlet_ii_2a.txt
+│   ├── narrator_repeat.txt
+│   ├── Ophelia_hamlet_ii_1b.txt
+│   ├── partial_hamlet_act_ii_script.txt
+│   ├── Polonius_hamlet_ii_1a.txt
+│   ├── Polonius_hamlet_ii_1b.txt
+│   ├── Queen_hamlet_ii_2a.txt
+│   ├── Reynaldo_hamlet_ii_1a.txt
+│   ├── Rosencrantz_hamlet_ii_2a.txt
+│   ├── test_1_AJbro_1a.txt
+│   ├── test_1_hrbo_1a.txt
+│   ├── test_1_narrator_1a.txt
+│   ├── test_1_script.txt
+│   ├── test_2_empty_config.txt
+│   ├── test_2_script.txt
+│   └── test_hamlet_ii_config.txt
+├── README.md
+├── README.txt
+├── src
+│   ├── lab2
+│   │   ├── declarations.rs
+│   │   ├── mod.rs
+│   │   ├── player.rs
+│   │   ├── play.rs
+│   │   ├── return_wrapper.rs
+│   │   ├── scene_fragments.rs
+│   │   └── script_gen.rs
+│   └── main.rs 
+```
+
+## Program Overview
+    * The main logic of our program is split amongest **player.rs**, **scene_fragments.rs**, and **play.rs**. 
+        * **player.rs** declares a struct Player modeling the the player name and their list of lines they will speak provided by a config file. It implements associated function prepare that parses the config file for the spoken lines as well as the speak function that delviers the next spoken line. It also overloads comparison operators for comparing 2 Player instances.
+        * **scene_fragments.rs** Declares the SceneFragment struct which models a colleciton of Players with their parts for a particular scene (one scene is composed of multiple config files). It contains Player associated functions (process_config, add_config, read_config, prepare) that reads a config file and create Player instances populated with their lines. The recite function sorts the lines across all Players in the SceneFragment's struct and delivers them in order. It also contains enter/exit methods that announces when a player enters or leaves for the scene.
+        * **play.rs** at the script level, play.rs delcares a Play struct that holds a vector of SceneFragments. Its process_config, add_config, read_config, and prepare functions read the script files, parses the scene titles, and create new scene fragments from the config files listed for that scene. Its recite function is mainly used to structure the play delivery according to the structure of the scene, that is announcing the character entrances, delviering the speach from each of the SceneFragments for a scene, and announcing the character exits. 
+
+## Insights/Questions
+* one of the challenges we encountered was implementing recite for scene_fragments.rs, where we had to ensure lines spoken by different characters are delivered in the correct order. We detailed our apporach for this under the Structs section
+* one quesiton that we had throughout the lab was if we should give prepare, read_config, add_config, and process_config different names for Play and SceneFargment implementations since one set of associated functions is meant for script files and the other set is meant for the config files.
+
+
+# Usage
+* CD into our unzipped folder (lab2), it should contain the src, data, and target folders.
+* run cargo build to build the project
+* cargo run <path to script file> [whinge] to run the program with the path of the script file. Optionally, provide the 'whinge' flag to recieve additional warning messages when parsing part files.
+* example: if you are in the lab2 folder and the script file 'test_script.txt' is in the lab2/data folder, to run the program with whinge enabled, use cargo run ./data/test_script.txt whinge Note: for each config file path in the script file and each txt part file in the config files, if the part files are not in the same directory as where the program is run on, you should preprend a full qualified path or the correct relative path to the config files and the part files.
+
 # Structs
 * Refactoring functions from script_gen.rs to associated functions for the Play and Player struct, one of the main changes we had to make was evaluting if the original funciton parameters would necessary/function correctly and if not we change the function signuatre, and replace its references in our function with references to the corresponding struct fields.
 * Refactoring the process config function invovled splitting up its functionalities for reading part files for lines and adding them to PlayLines to the Player struct under the Prepare associated funciton, and move the portion reading the config file for character and part file names to Play under the process_config associated function. Instead of just reading the line and push it to a Play struct like with the original Process_config in script_gen, the new function delegates the reading lines task to Prepare, and instead create new Player objects containing the read lines and append them to the Play struct's vec<player>
@@ -5,9 +69,27 @@
 * Refactoring Recite was challenging because now each Player object holds all of their lines, so we had to find a way to deliver their lines in order. Our solution was iterating through each Player object's PlayLines vector, get the line number, and create a vector<(usize, usize)> holding the line number and the Player instance's index in the vec<player>. We then sort that vec<(usize, usize)> by the line_num to figure out when each player should speak. We then iterate through the vec<(usize, usize)>, using the returned Player index to call the next_line and speak methods, while also check if the line_num is larger than what the next_line function returns. If it is, we break to prevent the current Player from speaking all of thier lines. 
 * We had to change the pathing to alot of the declarations in main.rs and add new declarations to play.rs and player.rs because we removed alot of constants and types from script_gen.rs and declarations.rs.
 
-#Return Wrapper:
-* i implemented the wrapper by using a struct and defining 2 functions called report and new. Report has to be implemented for a termination trait because it is in charge of ending ht eprogram and new i had to add because i need it to construct new returnwrappers. at first id dint have it and it gave me lots of compilation errors os io had to add it.
+# Return Wrapper:
+* we implemented the wrapper by using a struct and defining 2 functions called report and new. Report has to be implemented for a termination trait because it is in charge of ending ht eprogram and new i had to add because i need it to construct new returnwrappers. at first id dint have it and it gave me lots of compilation errors os io had to add it.
 
+extended your solution to manage multiple consecutive scene fragments, including any design challenges you encountered and how you addressed those.
 
 # Scene Fragments
-#TODO AMNAN CAN YOU DO THIS :D
+* To manage multiple consecutive scene fragments, the key change we had to make with in the associated functions add_config and process_config for the Play struct in Play.rs. Specifically, we had to provide implementation of add_config and process_config for the Play struct that correctly reads the Script Config file and correctly create a scenefragment for each config file listed. Then, we had to refactor the read_config, process_config, and prpeare methods in for the SceneFragment struct in scene_fragments.rs so they still correctly works with individual config files. Although the associated function names (prepare/read_config/process_config) are the same between the Play and SceneFragments struct, their functionality is completely different (one is at the Script Config level and the other is at the individal config file level), so separate implementations had to be provided.
+* When it comes to reciting all lines in the correct order, our implementation for SceneFragment's recite from Structs section also works here. For the implementation of recite in the Struct section, we create a vector to track the speaker's line number and their index within the vector of Players and, sort it by line number, and iterate through the sorted Player index and call next_line and speak. Since SceneFragment's field structure remained the same as that in the Struct section, our apporach worked with minimal changes.
+* Another challenge was implementing the correct functions and return types for the PartialOrd, PartialEq, and Ord traits of Player struct. Rust's documentation was helpful in helping us understand the function name and signature that we needed to implement as well as what the return type looks like.
+
+# Testing
+* we tested the provided partial_hamelt-act_ii_script.txt, and verfied it correctly Whinges when the first line doesn't start at 0
+* **test_1_script.txt** is our test script. it contains 3 config txt files (test_1_hrbo_1a.txt, test_1_AJbro_1a.txt, test_1_narrator_1a.txt) split into 2 scenes with 4 speak files (hrbo_repeat.txt, jbro_repeat.txt, narrator_repeat.txt, abro_repeat.txt). 
+    * each of the 4 speak files will have a couple of bad formatting instances. This includes:
+        * repeated line numbers where the line content is different. This repeated line number also carries across files (ex 2 abro_repeat and jbro_repeat.txt shares line 7, and hbro_repeat.txt and narrator_repeat.txt shares line 0)
+            * our program handles by delivering them in sequence. It whinges if whinge mode is on, for every dupelicated line
+        * out of order line numbers
+            * during testing we discovered our program didn't correctly deliver these out of order line numbers for a speak file in order because we dind't sort the PlayLines field in Player struct in the prepare method. We added that back in and the issue was resolved
+        * lines with number only
+            * when parsing lines with only line number and no text content, our program correctly ignores that line and does not print it out
+        * lines with no numbers
+            * when parsing lines missing a line number, our program correcty ignores that line and if Whinge is on, it gives a warning about missing line number
+* **test_2_script.txt** is another testing script with two scenes. The first scene doesn't have a config file under it, and the second scene has an empty config file 'test_2_empty_config.txt'.
+    * upon encountering the empty config file, our program will throw an error 'Error: no lines from config file './data/test_2_empty_config.txt' were read, exiting read_config with error code 2' and main function will return the GENERATION_FAILURE code.

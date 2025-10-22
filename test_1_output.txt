@@ -1,0 +1,41 @@
+"Hbro's monologue scene"!
+[Enter "narrator".]
+
+Speaker: narrator
+"this is a conversation between Abro, Hbro, and Jbro"
+"they are talking in some classroom"
+[Exit "narrator".]
+
+[Enter "Hbro".]
+
+Speaker: Hbro
+"hello"
+"today I was studying for our upcoming exam"
+"i haven't made a cheat sheet yet"
+"can anyone share their with me"
+"Also on another note wow its really hard finding a job in this market"
+"also how is the job search going"
+"is this the same for you guys too"
+[Exit "Hbro".]
+
+"Abro and Jbro reply scene"
+[Enter "Abro".]
+[Enter "Jbro".]
+
+Speaker: Abro
+"yooo wassup guys"
+"yea job searching is hard"
+"but anyways wassup Jbro"
+
+Speaker: Jbro
+"Yoooo Abro how was your fall break"
+
+Speaker: Abro
+"Fall break was good!"
+"Life is good!"
+
+Speaker: Jbro
+"Dang thats cool!"
+"the end"
+[Exit "Jbro".]
+[Exit "Abro".]

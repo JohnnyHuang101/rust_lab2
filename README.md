@@ -1,3 +1,67 @@
+# CSE 5402 Fall 2025 Lab 2
+
+## Teammates
+    * Aman Verma - aman.v@wustl.edu
+    * Johnny Huang - h.johnny@wustl.edu
+    * Hanson Li - hanson.l@wustl.edu
+
+## Structure
+``` 
+├── data
+│   ├── abro_repeat.txt
+│   ├── Guildenstern_hamlet_ii_2a.txt
+│   ├── hamlet_ii_1a_config.txt
+│   ├── hamlet_ii_1b_config.txt
+│   ├── hamlet_ii_2a_config.txt
+│   ├── hbro_repeat.txt
+│   ├── jbro_repeat.txt
+│   ├── King_hamlet_ii_2a.txt
+│   ├── narrator_repeat.txt
+│   ├── Ophelia_hamlet_ii_1b.txt
+│   ├── partial_hamlet_act_ii_script.txt
+│   ├── Polonius_hamlet_ii_1a.txt
+│   ├── Polonius_hamlet_ii_1b.txt
+│   ├── Queen_hamlet_ii_2a.txt
+│   ├── Reynaldo_hamlet_ii_1a.txt
+│   ├── Rosencrantz_hamlet_ii_2a.txt
+│   ├── test_1_AJbro_1a.txt
+│   ├── test_1_hrbo_1a.txt
+│   ├── test_1_narrator_1a.txt
+│   ├── test_1_script.txt
+│   ├── test_2_empty_config.txt
+│   ├── test_2_script.txt
+│   └── test_hamlet_ii_config.txt
+├── README.md
+├── README.txt
+├── src
+│   ├── lab2
+│   │   ├── declarations.rs
+│   │   ├── mod.rs
+│   │   ├── player.rs
+│   │   ├── play.rs
+│   │   ├── return_wrapper.rs
+│   │   ├── scene_fragments.rs
+│   │   └── script_gen.rs
+│   └── main.rs 
+```
+
+## Program Overview
+    * The main logic of our program is split amongest **player.rs**, **scene_fragments.rs**, and **play.rs**. 
+        * **player.rs** declares a struct Player modeling the the player name and their list of lines they will speak provided by a config file. It implements associated function prepare that parses the config file for the spoken lines as well as the speak function that delviers the next spoken line. It also overloads comparison operators for comparing 2 Player instances.
+        * **scene_fragments.rs** Declares the SceneFragment struct which models a colleciton of Players with their parts for a particular scene (one scene is composed of multiple config files). It contains Player associated functions (process_config, add_config, read_config, prepare) that reads a config file and create Player instances populated with their lines. The recite function sorts the lines across all Players in the SceneFragment's struct and delivers them in order. It also contains enter/exit methods that announces when a player enters or leaves for the scene.
+        * **play.rs** at the script level, play.rs delcares a Play struct that holds a vector of SceneFragments. Its process_config, add_config, read_config, and prepare functions read the script files, parses the scene titles, and create new scene fragments from the config files listed for that scene. Its recite function is mainly used to structure the play delivery according to the structure of the scene, that is announcing the character entrances, delviering the speach from each of the SceneFragments for a scene, and announcing the character exits. 
+
+## Insights/Questions
+* one of the challenges we encountered was implementing recite for scene_fragments.rs, where we had to ensure lines spoken by different characters are delivered in the correct order. We detailed our apporach for this under the Structs section
+* one quesiton that we had throughout the lab was if we should give prepare, read_config, add_config, and process_config different names for Play and SceneFargment implementations since one set of associated functions is meant for script files and the other set is meant for the config files.
+
+
+# Usage
+* CD into our unzipped folder (lab2), it should contain the src, data, and target folders.
+* run cargo build to build the project
+* cargo run <path to script file> [whinge] to run the program with the path of the script file. Optionally, provide the 'whinge' flag to recieve additional warning messages when parsing part files.
+* example: if you are in the lab2 folder and the script file 'test_script.txt' is in the lab2/data folder, to run the program with whinge enabled, use cargo run ./data/test_script.txt whinge Note: for each config file path in the script file and each txt part file in the config files, if the part files are not in the same directory as where the program is run on, you should preprend a full qualified path or the correct relative path to the config files and the part files.
+
 # Structs
 * Refactoring functions from script_gen.rs to associated functions for the Play and Player struct, one of the main changes we had to make was evaluting if the original funciton parameters would necessary/function correctly and if not we change the function signuatre, and replace its references in our function with references to the corresponding struct fields.
 * Refactoring the process config function invovled splitting up its functionalities for reading part files for lines and adding them to PlayLines to the Player struct under the Prepare associated funciton, and move the portion reading the config file for character and part file names to Play under the process_config associated function. Instead of just reading the line and push it to a Play struct like with the original Process_config in script_gen, the new function delegates the reading lines task to Prepare, and instead create new Player objects containing the read lines and append them to the Play struct's vec<player>
@@ -29,3 +93,8 @@ extended your solution to manage multiple consecutive scene fragments, including
             * when parsing lines missing a line number, our program correcty ignores that line and if Whinge is on, it gives a warning about missing line number
 * **test_2_script.txt** is another testing script with two scenes. The first scene doesn't have a config file under it, and the second scene has an empty config file 'test_2_empty_config.txt'.
     * upon encountering the empty config file, our program will throw an error 'Error: no lines from config file './data/test_2_empty_config.txt' were read, exiting read_config with error code 2' and main function will return the GENERATION_FAILURE code.
+
+# Testing outputs:
+* from the provided partial_hamlet_act_ii_script.txt: ./partial_hamlet_output.txt
+* from our 1st test file test_1_script.txt: ./test_1_output.txt
+* from our 2nd test file test_2_script.txt: ./test_2_output.txt

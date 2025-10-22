@@ -1,0 +1,5 @@
+Error: in script_gen, read_config call failed with error code 2
+Error from process config of Play after calling prepare on Fragment: 2
+Error: in prepare, process_config call failed with error code 2
+Error: in main, 2
+Error: 2
