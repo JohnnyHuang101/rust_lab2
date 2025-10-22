@@ -1,9 +1,9 @@
 0 hello
-1 hello
-1 hello1
-1 hello2
-2 hello3
+1 today I was studying for our upcoming exam
+1 i haven't made a cheat sheet yet
+1 can anyone share their with me
+2 also how is the job search going
  this line should not appear
-1 this line out of order
+1 Also on another note wow its really hard finding a job in this market
 nor should this line
-3 I am very sad and loser because I do not have a good job and I am stupid
+3 is this the same for you guys too

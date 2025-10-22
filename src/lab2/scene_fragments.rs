@@ -43,7 +43,7 @@ impl SceneFragment{
 
               if let Err(e) = new_player.prepare(speak_file){ //TODO: confirm if this is the prepare function he wants us to call and if we should call this before or after push to vec?
                 eprintln!("Error from process_config of SceneFragment: {}", e);
-                return Err(e); //TODO: change error code?
+                return Err(GENERATION_FAILURE);
               }
               
               self.chars_in_play.push(new_player);
@@ -157,7 +157,7 @@ impl SceneFragment{
                 //insert again into linenume_set to check for dupes
                 let linenum_insert_status = linenum_set.insert(*line_num);
                 if !linenum_insert_status{
-                    if WHINGE.load(Ordering::SeqCst) {
+                    if WHINGE.load(Ordering::SeqCst){
                         eprintln!("WHINGE Warning: duplicate line detected for line number: {}", line_num);
                     }
                 }

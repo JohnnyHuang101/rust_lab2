@@ -1,13 +1,13 @@
-use super::scene_fragments::SceneFragment; // Changed Player to SceneFragment
+use super::scene_fragments::SceneFragment;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
 use super::script_gen::grab_trimmed_file_lines;
 
-pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
-pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
-pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
-pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
-pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
+pub const TITLE_IDX: usize = 0;             //index of the line giving the title of the play
+pub const PART_FILE_IDX: usize = 1; //index of the first line containing character info
+pub const CHAR_NAME_POS: usize = 0; //index of the character's name in a line
+pub const FILE_NAME_TOKEN_POS: usize = 1;      //index of the file containing the character's lines
+pub const EXPECTED_TOKENS: usize = 2;       //expected number of tokens in a character line
 
 // pub type PlayConfig = Vec<(String, String)>;
 

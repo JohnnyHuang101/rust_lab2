@@ -1,6 +1,6 @@
 use std::sync::atomic;
 use std::cmp::Ordering;
-use super::declarations::{WHINGE,GENERATION_FAILURE};
+use super::declarations::{WHINGE,GENERATION_FAILURE, ZERO_IDX};
 use super::script_gen::grab_trimmed_file_lines; //needed to impoirt this
 pub type PlayLines = Vec<(usize, String)>;
 
@@ -17,7 +17,7 @@ impl Player{
          Self {
             char_name: char_name.to_string(),
             char_lines: Vec::new(),
-            cur_entry_idx : 0,
+            cur_entry_idx : ZERO_IDX,
          }
     }
 
@@ -52,7 +52,7 @@ impl Player{
         for a_line in cur_file_line_vec.iter() {
             self.add_script_line(a_line)
         }
-
+        self.char_lines.sort_by_key(|a_tuple| a_tuple.0); //need to use sort by key on the line nume (1st tuple pos) to correctly sort out of order lines
         Ok (())
     }
 

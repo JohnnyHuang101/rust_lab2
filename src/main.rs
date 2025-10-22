@@ -9,6 +9,8 @@ use lab2::declarations::{
     EXIT_BAD_CMDLINE,
     GENERATION_FAILURE,
     WHINGE,
+    SUCCESS_CODE,
+    ZERO_IDX
 };
 // use lab2::script_gen::script_gen;
 use lab2::play::Play;
@@ -25,7 +27,7 @@ fn parse_args(script: &mut String) -> Result<(), u8> {
     }
 
     if args.len() < ARGS_MIN || args.len() > ARGS_MAX || (args.len()==ARGS_MAX && args[ARG_WHINGE_IDX] != "whinge"){
-        print!("{}", usage(&args[0]));
+        print!("{}", usage(&args[ZERO_IDX]));
         return Err(EXIT_BAD_CMDLINE);
     }
     *script = args[ARG_SCRIPT_IDX].clone();
@@ -92,7 +94,7 @@ fn main() -> ReturnWrapper {
     //     return Err(GENERATION_FAILURE);
     // }
 
-    return ReturnWrapper::new(0)
+    return ReturnWrapper::new(SUCCESS_CODE)
 }
 
 
