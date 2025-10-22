@@ -1,14 +1,16 @@
+//scene_fragments.rs. Declares the SceneFragment struct that holds a vec of players in a scene, with asscoiated functions for annoucning entrances/exists, and processing the config files and reciting the lines of each character stored in the SceneFragment as well as processing the config files. Johnny Huang, Hanson Li, Aman Verma
+
 use super::player::Player;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
 use super::script_gen::grab_trimmed_file_lines;
 use std::collections::HashSet; //need hashset for checking duplicate lines
 
-pub const TITLE_IDX: usize = 0;             // Index of the line giving the title of the play
-pub const PART_FILE_IDX: usize = 1; // Index of the first line containing character info
-pub const CHAR_NAME_POS: usize = 0; // Index of the character's name in a line
-pub const FILE_NAME_TOKEN_POS: usize = 1;      // Index of the file containing the character's lines
-pub const EXPECTED_TOKENS: usize = 2;       // Expected number of tokens in a character line
+pub const TITLE_IDX: usize = 0;             //index of the line giving the title of the play
+pub const PART_FILE_IDX: usize = 1; //index of the first line containing character info
+pub const CHAR_NAME_POS: usize = 0; //index of the character's name in a line
+pub const FILE_NAME_TOKEN_POS: usize = 1;      //index of the file containing the character's lines
+pub const EXPECTED_TOKENS: usize = 2;       //expected number of tokens in a character line
 
 pub type PlayConfig = Vec<(String, String)>;
 
@@ -26,14 +28,7 @@ impl SceneFragment{
          }
     }
 
-    // Move the remainder of the process_config function that wasn't moved into the implementation of the Player struct, 
-    // out of the script_gen.rs file and into the implementation block for the SceneFragment struct. 
-    // Modify its signature so that it is a method for the SceneFragment struct. For each of the PlayConfig tuples, 
-    // the process_config method should create a new instance of the Player struct using the tuple's character name field, 
-    // push the new Player into the SceneFragment struct's vector, and pass the tuple's part file name into a call to the new Player 
-    // struct's prepare method - if the call to the prepare method fails, the process_config method should return an appropriate error.
-
-
+    // read each line in the config, calls Player's prepare function to parse the lines
     pub fn process_config(&mut self, play_cfg: &PlayConfig) -> Result<(), u8> {
         //note: iter yeilds immutable refs in rusts
         for a_cfg in play_cfg.iter() {
@@ -52,6 +47,7 @@ impl SceneFragment{
         Ok (())
     }
 
+    // add parsed config line to a vector (PlayConfig) holding the lines split by character name and the config file path
     pub fn add_config(&self, cfg_line: &String, play_cfg: &mut PlayConfig){
         //split_whitespace gives an iterable, and collect turns that into a collection
         //since using &str, need to do .to_string when inserting into play_cfg because it is of type <String, String>
@@ -72,6 +68,7 @@ impl SceneFragment{
 
     }
     
+    // calls grab_trimmed_file_lines to populate a vector of strings holding the unsplit character and config file path, then call add_config on each of those lines to split and store into the PlayConfig 
     pub fn read_config(&mut self, cfg_fname: &String, play_cfg: &mut PlayConfig) -> Result<(), u8> {
         //play_title param is now a struct attribute self.scene_title
 
@@ -102,7 +99,7 @@ impl SceneFragment{
     }
 
 
-
+    //calls the read_config and process_config in order
     pub fn prepare(&mut self, cfg_fname: &String) -> Result<(), u8> {
         //change the original script gen params: play_title: &mut String, play_vec: &mut SceneFragment to fields from SceneFragment struct
         let mut playcfg_var = PlayConfig::new();
@@ -120,28 +117,7 @@ impl SceneFragment{
         Ok(())
     }
 
-    //helper function for checking if line numbers in a Player struct in SceneFragment's vec of Players is duplicated. If so, return true else false
-    // fn check_dupe_lines(&self) -> bool {
-    //     let mut line_num_set :HashSet<usize> = HashSet::new();
-
-    //     for a_player in self.chars_in_play.iter(){
-    //         line_num_set.clear();
-    //         for a_line in a_player.char_lines.iter(){
-
-    //             let cur_line_num = a_line.0;
-    //             //hash set will return false if it didn't insert--meaning the line num already exist previously so there is a duplicate line
-    //             let set_insert_status = line_num_set.insert(cur_line_num);
-                
-    //             if !set_insert_status{
-    //                 return true;
-    //             }
-    //         }
-    //     }
-
-    //     return false;
-
-    // }
-
+    //For each player stored in the vector of Player, we print their lines in order by extracting their line number (first pos in tuple) with the index of the Player struct in the vector and store in a vector of <usize, usize>, then we sort that vector by line number, which gives us the correct order of who should be speaking. 
     pub fn recite(&mut self) -> Result<(), u8> {
 
         let mut most_recent_speaker = String::new();
@@ -173,11 +149,6 @@ impl SceneFragment{
                 eprintln!("WHINGE Warning: line number should start at 0!");
             }
             
-            // //warning for dupe line, just need to run once per recite call
-            // if self.check_dupe_lines(){
-            //     eprintln!("WHINGE Warning: duplicate line detected!");
-
-            // }
         }
         //loop through vector to get player idx and call speak
         for (line_num_speak, player_idx) in linenum_and_speaker_vec.iter(){ //line_num_speak are the line numbers a character is suppoed to speak according to our sorting. Use this with next_line to prevent character from speaking all their lines.
@@ -195,6 +166,7 @@ impl SceneFragment{
 
     }
 
+    //announces who enters the scene that also checks against a previous scene fragment to prevent announcing someone already in the scene
     pub fn enter(&self, prev_fragment: &SceneFragment) {
         if self.scene_title.split_whitespace().next().is_some() {
             println!("{:?}", self.scene_title);
@@ -219,12 +191,14 @@ impl SceneFragment{
         }
     }
 
+    //announces who exits by checking if they will be in the next fragment or not
     pub fn exit(&self, next_fragment: &SceneFragment) {
         for plyr in self.chars_in_play.iter().rev() { //using rev to reverse iterator so we print exit names in reverse order
             if !next_fragment.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
                 println!("[Exit {:?}.]", plyr.char_name);
             }
         }
+        println!(); //new line to separate the next scene
     }
 
     pub fn exit_all(&self) {

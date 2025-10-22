@@ -1,0 +1,3 @@
+[scene] This scene has no config file
+[scene] This scene has empty config file
+./data/test_2_empty_config.txt

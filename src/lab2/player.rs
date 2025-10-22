@@ -1,14 +1,16 @@
+//player.rs declares a Player struct that holds information about the character's name, their current spoken line number, and a vector of PlayLines that contains a line number and the text per line. Also contains associated functions for Player that parse and stores lines from the speak files and deliver them. Hanson Li, Aman Verma, Johnny Huang
+
 use std::sync::atomic;
 use std::cmp::Ordering;
 use super::declarations::{WHINGE,GENERATION_FAILURE, ZERO_IDX};
-use super::script_gen::grab_trimmed_file_lines; //needed to impoirt this
-pub type PlayLines = Vec<(usize, String)>;
+use super::script_gen::grab_trimmed_file_lines;
+pub type PlayLines = Vec<(usize, String)>; //per line, holds information about the line number and the text.
 
 #[derive(Debug)]
 pub struct Player{
-    pub char_name: String,
-    pub char_lines: PlayLines,
-    pub cur_entry_idx: usize,
+    pub char_name: String, //character name
+    pub char_lines: PlayLines, //vector of tuple of (line number, line text)
+    pub cur_entry_idx: usize, //current line number spoken by character
 }
 
 impl Player{
@@ -21,7 +23,7 @@ impl Player{
          }
     }
 
-
+    //adds a line parsed from self.prepare to our chars_lines vector
     fn add_script_line(&mut self, unparsed_line: &String){
         if unparsed_line.len() > 0 {
             if let Some((first_token, remain_token)) = unparsed_line.split_once(char::is_whitespace) {
@@ -32,7 +34,7 @@ impl Player{
                 self.char_lines.push((line_num, line_extract.to_string()));
                 } else {
                     if WHINGE.load(atomic::Ordering::SeqCst){
-                        eprintln!("Error: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
+                        eprintln!("Whinge Warning: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
                     }
 
                 }
@@ -40,6 +42,7 @@ impl Player{
         }
     }
 
+    //read lines and their line number from the speak files
     pub fn prepare(&mut self, part_name: &String) -> Result<(), u8> {
 
 
@@ -56,6 +59,7 @@ impl Player{
         Ok (())
     }
 
+    //delivers the lines using self.char_lines
     pub fn speak(&mut self, most_recent_speaker: &mut String){
         if self.cur_entry_idx < self.char_lines.len(){
             //check if passed in name same as struct char name
@@ -71,15 +75,10 @@ impl Player{
 
 
         } 
-        //simply return if lines >= lines. So if the lines are already past the players lines, we do nothing
     }  
     
-    //dd an associated public next_line method to the implementation block for the Player struct, 
-    // which takes an immutable reference to itself and returns an Option<usize>.
-    //  The method should check whether the Player struct's index is less than the number of elements in its PlayLines container: 
-    // if it is, the method should return Some() with the line number at the current index; if it is not, 
-    // the method should return None.
-
+    
+    //checks if the current character still has a next line, return line num if yes None if doesn't
     pub fn next_line(&self) -> Option<usize> {
         if self.cur_entry_idx < self.char_lines.len(){
             return Some(self.char_lines[self.cur_entry_idx].0)
@@ -107,11 +106,6 @@ impl PartialEq for Player{
 
 //how to implement Eq: https://doc.rust-lang.org/std/cmp/trait.Eq.html
 impl Eq for Player{}
-
-
-//A player is strictly less than another player (and the other player is thus strictly greater) 
-// if (1) they have no lines to speak and the other player does, or (2) both have lines to speak and they 
-// have a lower first line number than the other player.
 
 //PartialOrd fn sig: https://doc.rust-lang.org/std/cmp/trait.PartialOrd.html
 impl PartialOrd for Player{

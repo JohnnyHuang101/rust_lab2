@@ -1,3 +1,5 @@
+//declarations.rs: provides constants and Whinge that are used by different rs files. Johnny Huang, Aman Verma, Hanson Li
+
 use std::sync::atomic::AtomicBool;
 
 pub type Line = (usize, String, String);

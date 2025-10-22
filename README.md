@@ -15,3 +15,17 @@ extended your solution to manage multiple consecutive scene fragments, including
 * When it comes to reciting all lines in the correct order, our implementation for SceneFragment's recite from Structs section also works here. For the implementation of recite in the Struct section, we create a vector to track the speaker's line number and their index within the vector of Players and, sort it by line number, and iterate through the sorted Player index and call next_line and speak. Since SceneFragment's field structure remained the same as that in the Struct section, our apporach worked with minimal changes.
 * Another challenge was implementing the correct functions and return types for the PartialOrd, PartialEq, and Ord traits of Player struct. Rust's documentation was helpful in helping us understand the function name and signature that we needed to implement as well as what the return type looks like.
 
+# Testing
+* we tested the provided partial_hamelt-act_ii_script.txt, and verfied it correctly Whinges when the first line doesn't start at 0
+* **test_1_script.txt** is our test script. it contains 3 config txt files (test_1_hrbo_1a.txt, test_1_AJbro_1a.txt, test_1_narrator_1a.txt) split into 2 scenes with 4 speak files (hrbo_repeat.txt, jbro_repeat.txt, narrator_repeat.txt, abro_repeat.txt). 
+    * each of the 4 speak files will have a couple of bad formatting instances. This includes:
+        * repeated line numbers where the line content is different. This repeated line number also carries across files (ex 2 abro_repeat and jbro_repeat.txt shares line 7, and hbro_repeat.txt and narrator_repeat.txt shares line 0)
+            * our program handles by delivering them in sequence. It whinges if whinge mode is on, for every dupelicated line
+        * out of order line numbers
+            * during testing we discovered our program didn't correctly deliver these out of order line numbers for a speak file in order because we dind't sort the PlayLines field in Player struct in the prepare method. We added that back in and the issue was resolved
+        * lines with number only
+            * when parsing lines with only line number and no text content, our program correctly ignores that line and does not print it out
+        * lines with no numbers
+            * when parsing lines missing a line number, our program correcty ignores that line and if Whinge is on, it gives a warning about missing line number
+* **test_2_script.txt** is another testing script with two scenes. The first scene doesn't have a config file under it, and the second scene has an empty config file 'test_2_empty_config.txt'.
+    * upon encountering the empty config file, our program will throw an error 'Error: no lines from config file './data/test_2_empty_config.txt' were read, exiting read_config with error code 2' and main function will return the GENERATION_FAILURE code.

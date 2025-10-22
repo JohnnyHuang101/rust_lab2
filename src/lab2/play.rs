@@ -1,3 +1,5 @@
+//play.rs declares the Play struct that holds vector of SceneFragments. It contains associated functions for processing the script files and structuring the line delivery. Hanson Li, Johnny Haung, Aman Verma
+
 use super::scene_fragments::SceneFragment;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
@@ -9,7 +11,6 @@ pub const CHAR_NAME_POS: usize = 0; //index of the character's name in a line
 pub const FILE_NAME_TOKEN_POS: usize = 1;      //index of the file containing the character's lines
 pub const EXPECTED_TOKENS: usize = 2;       //expected number of tokens in a character line
 
-// pub type PlayConfig = Vec<(String, String)>;
 
 pub type ScriptConfig = Vec<(bool, String)>; 
 pub type Fragments = Vec<SceneFragment>; 
@@ -24,18 +25,9 @@ impl Play{
             fragments: Vec::new(),
         }
     }
-    // Modify the implementation of the Play struct's associated process_config method so that 
-    // it maintains a title string with which to initialize each new SceneFragment it creates. 
-    // The method should destructure each tuple in the ScriptConfig argument that was passed to it, 
-    // into a boolean variable indicating whether the text field represents the title of a new scene (true) 
-    // or the name of a configuration file (false). If the text is a new title the method should use it to update 
-    // its title string; otherwise it should (1) use the title string to push a new SceneFragment into the 
-    // Play struct's vector of fragments, (2) set the title string to be an empty string (so a new title is 
-    // only announced by the first fragment of the scene), (3) pass the text from the current configuration tuple 
-    // into a call to the new fragment's prepare method, and (4) match on the result of that call. If that call failed,
-    //  the process_config method should return an error indicating that script generation failed - otherwise 
-    // if the call succeeded the process_config method should continue to the next tuple.
-    
+
+
+    //the process_config function here reads in the script.txt file, iterate through the scene title and listed config file paths, and call SceneFragment's prepare function on the config file paths.
     pub fn process_config(&mut self, play_cfg: &ScriptConfig) -> Result<(), u8> {
         //variable to keep track of index of fragment in self.fragments after insertion
         let mut latest_frag_idx: usize;
@@ -70,9 +62,9 @@ impl Play{
         Ok (())
     }
 
+    //for a line in the script file, determine if it is a scene line or a line with config file paths and add a bool val to the vector of lines
     pub fn add_config(&self, cfg_line: &String, play_cfg: &mut ScriptConfig){
         //split_whitespace gives an iterable, and collect turns that into a collection
-        //since using &str, need to do .to_string when inserting into play_cfg because it is of type <String, String>
 
         let cfg_items: Vec<&str> = cfg_line.split_whitespace().collect(); 
 
@@ -101,7 +93,8 @@ impl Play{
             }
         }
     }
-      
+    
+    //read in the script file with grab_trimmed_file_lines function 
     pub fn read_config(&self, cfg_fname: &String, play_cfg: &mut ScriptConfig) -> Result<(), u8> {
         //play_title param is now a struct attribute self.scene_title
 
@@ -112,8 +105,6 @@ impl Play{
                     eprintln!("Error: no lines read from script file '{}'", cfg_fname);
                     return Err(GENERATION_FAILURE);
                 }
-                // self.scene_title = cfg_lines[TITLE_IDX].to_string();
-                // can skip the 1st elem of cfg_lines as it contains the title, using PART_FILE_IDX for this
  
                 for a_cfg_line in cfg_lines.iter() {
                     //iter should already make a_cfg_line of &String type
@@ -129,6 +120,7 @@ impl Play{
         Ok(())
     }
 
+    //calls the read_config and process_config in order 
     pub fn prepare(&mut self, cfg_fname: &String) -> Result<(), u8> {
         //change the original script gen params: play_title: &mut String, play_vec: &mut Play to fields from Play struct
         let mut playcfg_var = ScriptConfig::new();
@@ -151,6 +143,7 @@ impl Play{
         Ok(())
     }
 
+    //formats the character speech parts in scene-structure by calling entry then fragment's recite, and exit for each SceneFragment in vector
     pub fn recite(&mut self) -> Result<(), u8> {
 
         let num_fragments = self.fragments.len();
@@ -191,33 +184,3 @@ impl Play{
     }
 
 }
-// for idx in 0..num_fragments {
-            
-//             //handle enter logic
-//             if idx == 0 {
-//                 self.fragments[idx].enter_all();
-//             } else {
-//                 //not first, pass reference to previous
-//                 let (prev_slice, current_and_rest) = self.fragments.split_at_mut(idx);
-//                 let prev_fragment = &prev_slice[idx - 1];
-//                 let current_fragment = &mut current_and_rest[0];
-//                 current_fragment.enter(prev_fragment);
-//             }
-
-//             let _ = self.fragments[idx].recite();
-
-//             if idx == num_fragments - 1 {
-                
-//                 self.fragments[idx].exit_all();
-//             } else {
-//                 // not the last, pass reference to next
-//                 let (current_slice, next_slice) = self.fragments.split_at_mut(idx + 1);
-//                 let current_fragment = &mut current_slice[idx];
-//                 let next_fragment = &next_slice[0];
-//                 current_fragment.exit(next_fragment);
-                
-//             }
-//         }
-
-//         Ok(())
-//     }

@@ -1,3 +1,5 @@
+//return_wrapper.rs: provides a ReturnWrapper for the main function implenting the Termination Trait. Johnny Huang, Aman Verma, Hanson Li
+
 use std::process::{ExitCode, Termination};
 
 pub struct ReturnWrapper {
@@ -10,10 +12,11 @@ impl ReturnWrapper {
     }
 }
 
+//Implementing the Termination trait for ReturnWrapper
 impl Termination for ReturnWrapper {
     fn report(self) -> ExitCode {
         if self.field_type != 0 {
-            eprintln!("Error FROM THE RETURN WRAPPER: {}", self.field_type);
+            eprintln!("Error: {}", self.field_type);
         }
         ExitCode::from(self.field_type)
     }
