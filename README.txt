@@ -93,3 +93,8 @@ extended your solution to manage multiple consecutive scene fragments, including
             * when parsing lines missing a line number, our program correcty ignores that line and if Whinge is on, it gives a warning about missing line number
 * **test_2_script.txt** is another testing script with two scenes. The first scene doesn't have a config file under it, and the second scene has an empty config file 'test_2_empty_config.txt'.
     * upon encountering the empty config file, our program will throw an error 'Error: no lines from config file './data/test_2_empty_config.txt' were read, exiting read_config with error code 2' and main function will return the GENERATION_FAILURE code.
+
+# Testing outputs:
+* from the provided partial_hamlet_act_ii_script.txt: ./partial_hamlet_output.txt
+* from our 1st test file test_1_script.txt: ./test_1_output.txt
+* from our 2nd test file test_2_script.txt: ./test_2_output.txt
