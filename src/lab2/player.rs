@@ -4,6 +4,8 @@ use std::sync::atomic;
 use std::cmp::Ordering;
 use super::declarations::{WHINGE,GENERATION_FAILURE, ZERO_IDX};
 use super::script_gen::grab_trimmed_file_lines;
+use std::io::{self, Write};
+
 pub type PlayLines = Vec<(usize, String)>; //per line, holds information about the line number and the text.
 
 #[derive(Debug)]
@@ -45,10 +47,11 @@ impl Player{
     //read lines and their line number from the speak files
     pub fn prepare(&mut self, part_name: &String) -> Result<(), u8> {
 
+        let mut stdout = io::stdout().lock(); // Get a locked handle to stdout
 
         let mut cur_file_line_vec: Vec::<String> = Vec::new();
         if let Err(e_code) = grab_trimmed_file_lines(&part_name, &mut cur_file_line_vec) {
-            println!("Error: process_script unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
+            writeln!(stdout,"Error: process_script unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
             return Err(GENERATION_FAILURE);
         } 
 
@@ -61,16 +64,19 @@ impl Player{
 
     //delivers the lines using self.char_lines
     pub fn speak(&mut self, most_recent_speaker: &mut String){
+
+        let mut stdout = io::stdout().lock(); // Lock stderr
+
         if self.cur_entry_idx < self.char_lines.len(){
             //check if passed in name same as struct char name
             if *most_recent_speaker != self.char_name {
                 *most_recent_speaker = self.char_name.to_string();
-                println!();
-                println!("Speaker: {}", most_recent_speaker);
+                writeln!(stdout);
+                writeln!(stdout,"Speaker: {}", most_recent_speaker);
             }
             
             //'either case should print out text and inc index'
-            println!("{:?}", self.char_lines[self.cur_entry_idx].1);
+            writeln!(stdout,"{:?}", self.char_lines[self.cur_entry_idx].1);
             self.cur_entry_idx += 1
 
 

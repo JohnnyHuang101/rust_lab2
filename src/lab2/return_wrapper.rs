@@ -1,6 +1,7 @@
 //return_wrapper.rs: provides a ReturnWrapper for the main function implenting the Termination Trait. Johnny Huang, Aman Verma, Hanson Li
 
 use std::process::{ExitCode, Termination};
+use std::io::{self, Write};
 
 pub struct ReturnWrapper {
     pub field_type: u8,

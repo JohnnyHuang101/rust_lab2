@@ -5,6 +5,7 @@ use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
 use super::script_gen::grab_trimmed_file_lines;
 use std::collections::HashSet; //need hashset for checking duplicate lines
+use std::io::{self, Write};
 
 pub const TITLE_IDX: usize = 0;             //index of the line giving the title of the play
 pub const PART_FILE_IDX: usize = 1; //index of the first line containing character info
@@ -73,13 +74,15 @@ impl SceneFragment{
         //play_title param is now a struct attribute self.scene_title
 
         let mut cfg_lines: Vec<String> = Vec::new();
+        let mut stdout = io::stdout().lock(); // Lock stderr
+
 
         match grab_trimmed_file_lines(&cfg_fname, &mut cfg_lines) {
             Ok(_) => { //don't really need to read the ok code so use _
                 
                 // A config file can have 1 line, so we just check if it's empty
                 if cfg_lines.is_empty() { 
-                    println!("Error: no lines from config file '{}' were read, exiting read_config with error code {}", cfg_fname, GENERATION_FAILURE);
+                    writeln!(stdout,"Error: no lines from config file '{}' were read, exiting read_config with error code {}", cfg_fname, GENERATION_FAILURE);
                     return Err(GENERATION_FAILURE);
                 }
             
@@ -89,7 +92,7 @@ impl SceneFragment{
                 }
             },
             Err(e_code) => {
-                println!("Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
+                writeln!(stdout,"Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
                 return Err(GENERATION_FAILURE);
             }
 
@@ -168,42 +171,52 @@ impl SceneFragment{
 
     //announces who enters the scene that also checks against a previous scene fragment to prevent announcing someone already in the scene
     pub fn enter(&self, prev_fragment: &SceneFragment) {
+        let mut stdout = std::io::stdout().lock();
+
         if self.scene_title.split_whitespace().next().is_some() {
-            println!("{:?}", self.scene_title);
+            writeln!(stdout,"{:?}", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
             //to check if prev player is already in the current list of players by their character name. If not, print the [Enter name] statement
             //followed this example using 'any' to check if elements in vec matches a condition: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.any
             if !prev_fragment.chars_in_play.iter().any(|prev_plyr| prev_plyr.char_name == plyr.char_name) {
-                println!("[Enter {:?}.]", plyr.char_name);
+                writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
             }
         }
     }
 
     pub fn enter_all(&self) {
+        let mut stdout = std::io::stdout().lock();
+
         if self.scene_title.split_whitespace().next().is_some() {
-            println!("{:?}!", self.scene_title);
+            writeln!(stdout,"{:?}!", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            println!("[Enter {:?}.]", plyr.char_name);
+            writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
         }
     }
 
     //announces who exits by checking if they will be in the next fragment or not
     pub fn exit(&self, next_fragment: &SceneFragment) {
+
+        let mut stdout = std::io::stdout().lock();
+
         for plyr in self.chars_in_play.iter().rev() { //using rev to reverse iterator so we print exit names in reverse order
             if !next_fragment.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
-                println!("[Exit {:?}.]", plyr.char_name);
+                writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
             }
         }
-        println!(); //new line to separate the next scene
+        writeln!(stdout); //new line to separate the next scene
     }
 
     pub fn exit_all(&self) {
+
+        let mut stdout = std::io::stdout().lock();
+
         for plyr in self.chars_in_play.iter().rev() {
-            println!("[Exit {:?}.]", plyr.char_name);
+            writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
         }
     }
 }

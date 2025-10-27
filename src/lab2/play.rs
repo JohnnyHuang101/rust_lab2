@@ -4,6 +4,7 @@ use super::scene_fragments::SceneFragment;
 use super::declarations::{WHINGE,GENERATION_FAILURE};
 use std::sync::atomic::Ordering;
 use super::script_gen::grab_trimmed_file_lines;
+use std::io::{self, Write};
 
 pub const TITLE_IDX: usize = 0;             //index of the line giving the title of the play
 pub const PART_FILE_IDX: usize = 1; //index of the first line containing character info
@@ -14,6 +15,7 @@ pub const EXPECTED_TOKENS: usize = 2;       //expected number of tokens in a cha
 
 pub type ScriptConfig = Vec<(bool, String)>; 
 pub type Fragments = Vec<SceneFragment>; 
+
 
 pub struct Play{
     fragments: Fragments
