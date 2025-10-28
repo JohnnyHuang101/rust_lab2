@@ -16,6 +16,7 @@ use lab2::declarations::{
 };
 use lab2::play::Play;
 use lab2::return_wrapper::ReturnWrapper;
+use std::io::{self, Write};
 
 fn usage(program_name: &str) -> String {
     format!("Wrong command line arguments. Correct usage: {program_name} <script_file_name> [whinge]\n")
@@ -40,6 +41,7 @@ fn parse_args(script: &mut String) -> Result<(), u8> {
 
 fn main() -> ReturnWrapper {
     let mut script_fname = String::new();
+    let mut stderr = io::stderr().lock();
 
     if let Err(e_code) = parse_args(&mut script_fname){
         println!("Error in main when calling parse_args with error code {}", e_code);
@@ -50,7 +52,7 @@ fn main() -> ReturnWrapper {
 
     if let Err(e_code) = play_content.prepare(&script_fname){
 
-        eprintln!("Error: in main, {}", e_code);
+        let _ = writeln!(stderr,"Error: in main, {}", e_code);
         return ReturnWrapper::new(GENERATION_FAILURE)
 
     }else{

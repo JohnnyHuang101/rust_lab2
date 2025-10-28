@@ -13,11 +13,12 @@ impl ReturnWrapper {
     }
 }
 
-//Implementing the Termination trait for ReturnWrapper
 impl Termination for ReturnWrapper {
     fn report(self) -> ExitCode {
         if self.field_type != 0 {
-            eprintln!("Error: {}", self.field_type);
+            // Lock stderr at runtime inside the function
+            let mut stderr = io::stderr().lock();
+            let _ = writeln!(stderr, "Error: {}", self.field_type);
         }
         ExitCode::from(self.field_type)
     }

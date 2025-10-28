@@ -27,6 +27,8 @@ impl Player{
 
     //adds a line parsed from self.prepare to our chars_lines vector
     fn add_script_line(&mut self, unparsed_line: &String){
+        let mut stderr = io::stderr().lock();
+
         if unparsed_line.len() > 0 {
             if let Some((first_token, remain_token)) = unparsed_line.split_once(char::is_whitespace) {
                 let line_extract = remain_token.trim(); //this will return &str, so we need to_string when pushing to Play
@@ -36,7 +38,7 @@ impl Player{
                 self.char_lines.push((line_num, line_extract.to_string()));
                 } else {
                     if WHINGE.load(atomic::Ordering::SeqCst){
-                        eprintln!("Whinge Warning: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
+                        let _ = writeln!(stderr,"Whinge Warning: the first token of the passed in line '{}' does not represent a valid usize value!", unparsed_line);
                     }
 
                 }
@@ -51,7 +53,7 @@ impl Player{
 
         let mut cur_file_line_vec: Vec::<String> = Vec::new();
         if let Err(e_code) = grab_trimmed_file_lines(&part_name, &mut cur_file_line_vec) {
-            writeln!(stdout,"Error: process_script unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
+            let _ = writeln!(stdout,"Error: process_script unsucessfully called grab_trimmed_file_lines with error code {}", e_code);
             return Err(GENERATION_FAILURE);
         } 
 
@@ -71,12 +73,12 @@ impl Player{
             //check if passed in name same as struct char name
             if *most_recent_speaker != self.char_name {
                 *most_recent_speaker = self.char_name.to_string();
-                writeln!(stdout);
-                writeln!(stdout,"Speaker: {}", most_recent_speaker);
+                let _ = writeln!(stdout);
+                let _ = writeln!(stdout,"Speaker: {}", most_recent_speaker);
             }
             
             //'either case should print out text and inc index'
-            writeln!(stdout,"{:?}", self.char_lines[self.cur_entry_idx].1);
+            let _ = writeln!(stdout,"{:?}", self.char_lines[self.cur_entry_idx].1);
             self.cur_entry_idx += 1
 
 

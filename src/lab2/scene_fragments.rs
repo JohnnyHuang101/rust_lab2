@@ -32,13 +32,15 @@ impl SceneFragment{
     // read each line in the config, calls Player's prepare function to parse the lines
     pub fn process_config(&mut self, play_cfg: &PlayConfig) -> Result<(), u8> {
         //note: iter yeilds immutable refs in rusts
+        let mut stderr = io::stderr().lock();
+
         for a_cfg in play_cfg.iter() {
             //example from Expressions slide: match t {(x, y) => do_func(x,y);}
             match a_cfg {(char_name, speak_file) => {
               let mut new_player = Player::new(&char_name); //need mut since prepare take mut &self
 
               if let Err(e) = new_player.prepare(speak_file){ //TODO: confirm if this is the prepare function he wants us to call and if we should call this before or after push to vec?
-                eprintln!("Error from process_config of SceneFragment: {}", e);
+                let _ = writeln!(stderr,"Error from process_config of SceneFragment: {}", e);
                 return Err(GENERATION_FAILURE);
               }
               
@@ -53,15 +55,16 @@ impl SceneFragment{
         //split_whitespace gives an iterable, and collect turns that into a collection
         //since using &str, need to do .to_string when inserting into play_cfg because it is of type <String, String>
         let cfg_items: Vec<&str> = cfg_line.split_whitespace().collect(); 
+        let mut stderr = io::stderr().lock();
 
         if cfg_items.len() > EXPECTED_TOKENS {
             if WHINGE.load(Ordering::SeqCst) {
-                eprintln!("Error: expecting config line to have 2 items but got more than 2 items, pushing first 2 elements");
+                let _ = writeln!(stderr,"Error: expecting config line to have 2 items but got more than 2 items, pushing first 2 elements");
             }
             play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
         } else if cfg_items.len() < EXPECTED_TOKENS {
             if WHINGE.load(Ordering::SeqCst) {
-                eprintln!("Error: expecting config line to have 2 items but got less than 2 items. Not pushing anything");
+                let _ = writeln!(stderr,"Error: expecting config line to have 2 items but got less than 2 items. Not pushing anything");
             }
         } else {
             play_cfg.push((cfg_items[CHAR_NAME_POS].to_string(), cfg_items[FILE_NAME_TOKEN_POS].to_string()))
@@ -82,7 +85,7 @@ impl SceneFragment{
                 
                 // A config file can have 1 line, so we just check if it's empty
                 if cfg_lines.is_empty() { 
-                    writeln!(stdout,"Error: no lines from config file '{}' were read, exiting read_config with error code {}", cfg_fname, GENERATION_FAILURE);
+                    let _ = writeln!(stdout,"Error: no lines from config file '{}' were read, exiting read_config with error code {}", cfg_fname, GENERATION_FAILURE);
                     return Err(GENERATION_FAILURE);
                 }
             
@@ -92,7 +95,7 @@ impl SceneFragment{
                 }
             },
             Err(e_code) => {
-                writeln!(stdout,"Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
+                let _ = writeln!(stdout,"Error: in read_config, call to grab_trimmed_file_lines failed with error code {}", e_code);
                 return Err(GENERATION_FAILURE);
             }
 
@@ -106,13 +109,15 @@ impl SceneFragment{
     pub fn prepare(&mut self, cfg_fname: &String) -> Result<(), u8> {
         //change the original script gen params: play_title: &mut String, play_vec: &mut SceneFragment to fields from SceneFragment struct
         let mut playcfg_var = PlayConfig::new();
+        let mut stderr = io::stderr().lock();
+
         if let Err(e_code) = self.read_config(cfg_fname, &mut playcfg_var) {
-            eprintln!("Error: in script_gen, read_config call failed with error code {}", e_code);
+            let _ = writeln!(stderr,"Error: in script_gen, read_config call failed with error code {}", e_code);
             return Err(GENERATION_FAILURE);
         }
 
         if let Err(e_code) = self.process_config(&playcfg_var) {
-            eprintln!("Error: in script_gen, process_config call failed with error code {}", e_code);
+            let _ = writeln!(stderr,"Error: in script_gen, process_config call failed with error code {}", e_code);
             return Err(GENERATION_FAILURE);
         }
 
@@ -127,6 +132,7 @@ impl SceneFragment{
         //we can store the character's line number and the Player object's idx in a vector. Sort it by line number, and loop through this vector and call .speak
         let mut linenum_and_speaker_vec: Vec<(usize, usize)> = Vec::new();
         let mut linenum_set: HashSet<usize> = HashSet::new(); //use hashset to track dupe lines. If we insert dupe, it returns false so we use that to trigger whinge
+        let mut stderr = io::stderr().lock();
 
         for (player_idx, a_player) in self.chars_in_play.iter().enumerate(){
             for (line_num, _)in a_player.char_lines.iter(){
@@ -137,7 +143,7 @@ impl SceneFragment{
                 let linenum_insert_status = linenum_set.insert(*line_num);
                 if !linenum_insert_status{
                     if WHINGE.load(Ordering::SeqCst){
-                        eprintln!("WHINGE Warning: duplicate line detected for line number: {}", line_num);
+                        let _ = writeln!(stderr,"WHINGE Warning: duplicate line detected for line number: {}", line_num);
                     }
                 }
             }
@@ -149,7 +155,7 @@ impl SceneFragment{
         //Whinge if the first line doesn't start at 0 or there are duplicate lines
         if WHINGE.load(Ordering::SeqCst) {
             if linenum_and_speaker_vec[0].0 != 0{
-                eprintln!("WHINGE Warning: line number should start at 0!");
+                let _ = writeln!(stderr,"WHINGE Warning: line number should start at 0!");
             }
             
         }
@@ -171,52 +177,52 @@ impl SceneFragment{
 
     //announces who enters the scene that also checks against a previous scene fragment to prevent announcing someone already in the scene
     pub fn enter(&self, prev_fragment: &SceneFragment) {
-        let mut stdout = std::io::stdout().lock();
+        let mut stdout = io::stdout().lock();
 
         if self.scene_title.split_whitespace().next().is_some() {
-            writeln!(stdout,"{:?}", self.scene_title);
+            let _ = writeln!(stdout,"{:?}", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
             //to check if prev player is already in the current list of players by their character name. If not, print the [Enter name] statement
             //followed this example using 'any' to check if elements in vec matches a condition: https://doc.rust-lang.org/std/iter/trait.Iterator.html#method.any
             if !prev_fragment.chars_in_play.iter().any(|prev_plyr| prev_plyr.char_name == plyr.char_name) {
-                writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
+                let _ = writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
             }
         }
     }
 
     pub fn enter_all(&self) {
-        let mut stdout = std::io::stdout().lock();
+        let mut stdout = io::stdout().lock();
 
         if self.scene_title.split_whitespace().next().is_some() {
-            writeln!(stdout,"{:?}!", self.scene_title);
+            let _ = writeln!(stdout,"{:?}!", self.scene_title);
         }
 
         for plyr in &self.chars_in_play {
-            writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
+            let _ = writeln!(stdout,"[Enter {:?}.]", plyr.char_name);
         }
     }
 
     //announces who exits by checking if they will be in the next fragment or not
     pub fn exit(&self, next_fragment: &SceneFragment) {
 
-        let mut stdout = std::io::stdout().lock();
+        let mut stdout = io::stdout().lock();
 
         for plyr in self.chars_in_play.iter().rev() { //using rev to reverse iterator so we print exit names in reverse order
             if !next_fragment.chars_in_play.iter().any(|next_plyr| next_plyr.char_name == plyr.char_name) {
-                writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
+                let _ = writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
             }
         }
-        writeln!(stdout); //new line to separate the next scene
+        let _ = writeln!(stdout); //new line to separate the next scene
     }
 
     pub fn exit_all(&self) {
 
-        let mut stdout = std::io::stdout().lock();
+        let mut stdout = io::stdout().lock();
 
         for plyr in self.chars_in_play.iter().rev() {
-            writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
+            let _ = writeln!(stdout,"[Exit {:?}.]", plyr.char_name);
         }
     }
 }
